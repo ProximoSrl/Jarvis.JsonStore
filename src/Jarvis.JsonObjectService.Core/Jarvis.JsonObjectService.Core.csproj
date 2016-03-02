@@ -60,6 +60,7 @@
     <Compile Include="Storage\IObjectStore.cs" />
     <Compile Include="Storage\MongoObjectStore.cs" />
     <Compile Include="Storage\StoredObject.cs" />
+    <Compile Include="Support\HashUtils.cs" />
     <Compile Include="Support\JsonObjectServiceConfiguration.cs" />
   </ItemGroup>
   <ItemGroup>

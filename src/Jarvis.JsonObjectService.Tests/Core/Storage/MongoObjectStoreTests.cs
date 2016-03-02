@@ -86,5 +86,18 @@ namespace Jarvis.JsonObjectService.Tests.Core.Storage
             var allObj = coll.Find(new BsonDocument()).ToList();
             Assert.That(allObj.Count, Is.EqualTo(2));
         }
+
+        [Test]
+        public async void verify_save_avoid_duplicate()
+        {
+            String jsonObject = @"{ ""prop"" : ""test""}";
+            var saved1 = await sut.Store("test", "1", jsonObject);
+            var saved2 = await sut.Store("test", "1", jsonObject);
+            Assert.That(saved2, Is.Null);
+            var coll = db.GetCollection<StoredObject>("test");
+            var allObj = coll.Find(new BsonDocument()).ToList();
+            Assert.That(allObj.Count, Is.EqualTo(1));
+            Assert.That(allObj.Single().Id, Is.EqualTo(1L));
+        }
     }
 }

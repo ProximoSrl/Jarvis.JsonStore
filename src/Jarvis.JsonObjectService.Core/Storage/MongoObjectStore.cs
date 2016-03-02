@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson;
+﻿using Jarvis.JsonObjectService.Core.Support;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Collections.Concurrent;
@@ -70,9 +71,12 @@ namespace Jarvis.JsonObjectService.Core.Storage
         {
             var collectionInfo = GetCollectionForType(type);
             var obj = await GetById(type, id);
+            var hash = HashUtils.GetHash(jsonObject);
             if (obj != null)
             {
                 //check hash
+                if (obj.Hash == hash)
+                    return null;
             }
 
             StoredObject so = new StoredObject()
@@ -81,6 +85,7 @@ namespace Jarvis.JsonObjectService.Core.Storage
                 ApplicationId = id,
                 JsonPayload = jsonObject,
                 TimeStamp = DateTime.UtcNow,
+                Hash = hash,
             };
             collectionInfo.Collection.InsertOne(so);
                 //Query.EQ("weekNumber", week),
