@@ -16,7 +16,7 @@ namespace Jarvis.JsonObjectService.Core.Storage
         IMongoDatabase _database;
         private class ConnectionInfo
         {
-            public IMongoCollection<MongoStoredObject> Collection { get; set; }
+            public IMongoCollection<StoredObject> Collection { get; set; }
 
             public Int64 CurrentId;
 
@@ -33,10 +33,10 @@ namespace Jarvis.JsonObjectService.Core.Storage
         {
             if (!collections.ContainsKey(type))
             {
-                var collection = _database.GetCollection<MongoStoredObject>(type);
+                var collection = _database.GetCollection<StoredObject>(type + ".events");
                 var last = collection
                     .Find(new BsonDocument())
-                    .Sort(Builders<MongoStoredObject>.Sort.Descending(o => o.Id))
+                    .Sort(Builders<StoredObject>.Sort.Descending(o => o.Id))
                     .FirstOrDefault();
                 Int64 currentId = 0;
                 if (last != null)
@@ -61,8 +61,8 @@ namespace Jarvis.JsonObjectService.Core.Storage
         {
             var collectionInfo = GetCollectionForType(type);
             var obj = await collectionInfo.Collection
-                .Find(Builders<MongoStoredObject>.Filter.Eq(o => o.ApplicationId, id))
-                .Sort(Builders<MongoStoredObject>.Sort.Descending(o => o.Id))
+                .Find(Builders<StoredObject>.Filter.Eq(o => o.ApplicationId, id))
+                .Sort(Builders<StoredObject>.Sort.Descending(o => o.Id))
                 .FirstOrDefaultAsync();
             return obj;
         }
@@ -79,12 +79,11 @@ namespace Jarvis.JsonObjectService.Core.Storage
                     return null;
             }
 
-            MongoStoredObject so = new MongoStoredObject()
+            StoredObject so = new StoredObject()
             {
                 Id = collectionInfo.GetNextId(),
                 ApplicationId = id,
                 JsonPayload = jsonObject,
-                BsonPayload = BsonDocument.Parse(jsonObject),
                 TimeStamp = DateTime.UtcNow,
                 Hash = hash,
                 OpType = OperationType.Put
@@ -102,12 +101,11 @@ namespace Jarvis.JsonObjectService.Core.Storage
                 return null;
             }
 
-            MongoStoredObject so = new MongoStoredObject()
+            StoredObject so = new StoredObject()
             {
                 Id = collectionInfo.GetNextId(),
                 ApplicationId = id,
                 JsonPayload = null,
-                BsonPayload = null,
                 TimeStamp = DateTime.UtcNow,
                 Hash = obj.Hash,
                 Deleted = true,
@@ -118,11 +116,5 @@ namespace Jarvis.JsonObjectService.Core.Storage
 
 
         }
-    }
-
-    internal class MongoStoredObject : StoredObject
-    {
-
-        public BsonDocument BsonPayload { get; set; }
     }
 }
