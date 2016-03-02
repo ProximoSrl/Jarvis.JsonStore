@@ -91,6 +91,31 @@ namespace Jarvis.JsonObjectService.Core.Storage
             collectionInfo.Collection.InsertOne(so);
             return so;
         }
+
+        public async Task<StoredObject> DeleteById(String type, String id)
+        {
+            var collectionInfo = GetCollectionForType(type);
+            var obj = await GetById(type, id);
+            if (obj == null)
+            {
+                return null;
+            }
+
+            MongoStoredObject so = new MongoStoredObject()
+            {
+                Id = collectionInfo.GetNextId(),
+                ApplicationId = id,
+                JsonPayload = null,
+                BsonPayload = null,
+                TimeStamp = DateTime.UtcNow,
+                Hash = obj.Hash,
+                Deleted = true,
+            };
+            collectionInfo.Collection.InsertOne(so);
+            return so;
+
+
+        }
     }
 
     internal class MongoStoredObject : StoredObject

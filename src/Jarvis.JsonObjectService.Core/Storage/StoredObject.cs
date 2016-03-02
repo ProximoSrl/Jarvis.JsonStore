@@ -19,6 +19,11 @@ namespace Jarvis.JsonObjectService.Core.Storage
         public DateTime TimeStamp { get; set; }
 
         public String JsonPayload { get; set; }
+
+        /// <summary>
+        /// Object is marked as deleted
+        /// </summary>
+        public Boolean Deleted { get; set; }
     }
 
 

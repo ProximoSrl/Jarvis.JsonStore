@@ -24,6 +24,14 @@ namespace Jarvis.JsonObjectService.Core.Storage
         /// <returns></returns>
         Task<StoredObject> GetById(String type, String id);
 
+        /// <summary>
+        /// Mark the object as removed.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        Task<StoredObject> DeleteById(String type, String id);
+
     }
 
 }
