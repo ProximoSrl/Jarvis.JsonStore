@@ -33,7 +33,7 @@ namespace Jarvis.JsonObjectService.Core.Storage
         {
             if (!collections.ContainsKey(type))
             {
-                var collection = _database.GetCollection<StoredObject>(type + ".events");
+                var collection = _database.GetCollection<StoredObject>("events." + type);
                 var last = collection
                     .Find(new BsonDocument())
                     .Sort(Builders<StoredObject>.Sort.Descending(o => o.Id))

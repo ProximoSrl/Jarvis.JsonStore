@@ -9,6 +9,7 @@ using Castle.Windsor;
 using Jarvis.JsonObjectService.Core.Storage;
 using Jarvis.JsonObjectService.Core.Support;
 using MongoDB.Driver;
+using Jarvis.JsonObjectService.Core.Projections;
 
 namespace Json.ObjectService.Host.Support
 {
@@ -31,7 +32,10 @@ namespace Json.ObjectService.Host.Support
                     .ImplementedBy<MongoObjectStore>(),
                 Component
                     .For<IMongoDatabase>()
-                    .Instance(database));
+                    .Instance(database),
+                Component
+                    .For<PayloadProjection>()
+                    .ImplementedBy<PayloadProjection>());
         }
     }
 }
