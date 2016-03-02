@@ -99,5 +99,19 @@ namespace Jarvis.JsonObjectService.Tests.Core.Storage
             Assert.That(allObj.Count, Is.EqualTo(1));
             Assert.That(allObj.Single().Id, Is.EqualTo(1L));
         }
+
+        [Test]
+        public async void verify_save_avoid_duplicate_inverted_property()
+        {
+            String jsonObject1 = @"{ ""prop1"" : ""test1"", ""prop2"" : ""test2""}";
+            String jsonObject2 = @"{ ""prop2"" : ""test2"", ""prop1"" : ""test1""}";
+            var saved1 = await sut.Store("test", "1", jsonObject1);
+            var saved2 = await sut.Store("test", "1", jsonObject2);
+            Assert.That(saved2, Is.Null);
+            var coll = db.GetCollection<StoredObject>("test");
+            var allObj = coll.Find(new BsonDocument()).ToList();
+            Assert.That(allObj.Count, Is.EqualTo(1));
+            Assert.That(allObj.Single().Id, Is.EqualTo(1L));
+        }
     }
 }

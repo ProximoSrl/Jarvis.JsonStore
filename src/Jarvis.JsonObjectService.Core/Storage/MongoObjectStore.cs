@@ -71,7 +71,7 @@ namespace Jarvis.JsonObjectService.Core.Storage
         {
             var collectionInfo = GetCollectionForType(type);
             var obj = await GetById(type, id);
-            var hash = HashUtils.GetHash(jsonObject);
+            var hash = HashUtils.GetHashOfSerializedJson(jsonObject);
             if (obj != null)
             {
                 //check hash
@@ -79,19 +79,23 @@ namespace Jarvis.JsonObjectService.Core.Storage
                     return null;
             }
 
-            StoredObject so = new StoredObject()
+            MongoStoredObject so = new MongoStoredObject()
             {
                 Id = collectionInfo.GetNextId(),
                 ApplicationId = id,
                 JsonPayload = jsonObject,
+                BsonPayload = BsonDocument.Parse(jsonObject),
                 TimeStamp = DateTime.UtcNow,
                 Hash = hash,
             };
             collectionInfo.Collection.InsertOne(so);
-                //Query.EQ("weekNumber", week),
-                //Update.Replace(rawWeekPlan),
-                //UpdateFlags.Upsert);
             return so;
         }
+    }
+
+    internal class MongoStoredObject : StoredObject
+    {
+
+        public BsonDocument BsonPayload { get; set; }
     }
 }
