@@ -16,7 +16,7 @@ namespace Jarvis.JsonObjectService.Core.Storage
         IMongoDatabase _database;
         private class ConnectionInfo
         {
-            public IMongoCollection<StoredObject> Collection { get; set; }
+            public IMongoCollection<MongoStoredObject> Collection { get; set; }
 
             public Int64 CurrentId;
 
@@ -33,10 +33,10 @@ namespace Jarvis.JsonObjectService.Core.Storage
         {
             if (!collections.ContainsKey(type))
             {
-                var collection = _database.GetCollection<StoredObject>(type);
+                var collection = _database.GetCollection<MongoStoredObject>(type);
                 var last = collection
                     .Find(new BsonDocument())
-                    .Sort(Builders<StoredObject>.Sort.Descending(o => o.Id))
+                    .Sort(Builders<MongoStoredObject>.Sort.Descending(o => o.Id))
                     .FirstOrDefault();
                 Int64 currentId = 0;
                 if (last != null)
@@ -61,8 +61,8 @@ namespace Jarvis.JsonObjectService.Core.Storage
         {
             var collectionInfo = GetCollectionForType(type);
             var obj = await collectionInfo.Collection
-                .Find(Builders<StoredObject>.Filter.Eq(o => o.ApplicationId, id))
-                .Sort(Builders<StoredObject>.Sort.Descending(o => o.Id))
+                .Find(Builders<MongoStoredObject>.Filter.Eq(o => o.ApplicationId, id))
+                .Sort(Builders<MongoStoredObject>.Sort.Descending(o => o.Id))
                 .FirstOrDefaultAsync();
             return obj;
         }
@@ -87,6 +87,7 @@ namespace Jarvis.JsonObjectService.Core.Storage
                 BsonPayload = BsonDocument.Parse(jsonObject),
                 TimeStamp = DateTime.UtcNow,
                 Hash = hash,
+                OpType = OperationType.Put
             };
             collectionInfo.Collection.InsertOne(so);
             return so;
@@ -110,6 +111,7 @@ namespace Jarvis.JsonObjectService.Core.Storage
                 TimeStamp = DateTime.UtcNow,
                 Hash = obj.Hash,
                 Deleted = true,
+                OpType = OperationType.Delete
             };
             collectionInfo.Collection.InsertOne(so);
             return so;

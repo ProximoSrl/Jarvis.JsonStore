@@ -6,6 +6,7 @@ using Castle.MicroKernel.Registration;
 using Castle.MicroKernel.Resolvers.SpecializedResolvers;
 using Castle.Services.Logging.Log4netIntegration;
 using Castle.Windsor;
+using Jarvis.JsonObjectService.Core.Support;
 using Microsoft.Owin.Hosting;
 using System;
 using System.Collections.Generic;
@@ -20,10 +21,13 @@ namespace Json.ObjectService.Host.Support
         IWindsorContainer _container;
         ILogger _logger;
         private IDisposable _webApplication;
+        LocalJsonObjectServiceConfiguration _configuration;
 
         internal bool Start()
         {
+            _configuration = new LocalJsonObjectServiceConfiguration();
             _container = new WindsorContainer();
+            _container.Register(Component.For<JsonObjectServiceConfiguration>().Instance(_configuration));
 
             _container.Kernel.Resolver.AddSubResolver(new CollectionResolver(_container.Kernel, true));
             _container.Kernel.Resolver.AddSubResolver(new ArrayResolver(_container.Kernel, true));
@@ -42,8 +46,10 @@ namespace Json.ObjectService.Host.Support
             var installers = new List<IWindsorInstaller>()
             {
                 new ApiInstaller(),
+                new DefaultInstaller(_configuration),
             };
 
+            _container.Install(installers.ToArray());
 
             var options = new StartOptions();
 

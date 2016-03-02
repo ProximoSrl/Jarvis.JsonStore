@@ -104,8 +104,8 @@
       <HintPath>..\packages\MongoDB.Driver.Core.2.2.3\lib\net45\MongoDB.Driver.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.6.0.5\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.8.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Owin, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f0ebd12fd5e55cc5, processorArchitecture=MSIL">
@@ -156,6 +156,7 @@
     <Compile Include="Support\ApiInstaller.cs" />
     <Compile Include="Support\BootStrapper.cs" />
     <Compile Include="Support\ContainerWrapper.cs" />
+    <Compile Include="Support\DefaultInstaller.cs" />
     <Compile Include="Support\Log4NetExceptionLogger.cs" />
     <Compile Include="Support\WebApplication.cs" />
     <Compile Include="Support\WindsorDependencyScope.cs" />
@@ -167,6 +168,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="app\index.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Jarvis.JsonObjectService.Core\Jarvis.JsonObjectService.Core.csproj">
+      <Project>{25ab612c-cdb0-4446-96c5-a650dda95eed}</Project>
+      <Name>Jarvis.JsonObjectService.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

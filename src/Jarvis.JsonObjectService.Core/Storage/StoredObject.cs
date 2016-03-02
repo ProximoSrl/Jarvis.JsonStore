@@ -24,7 +24,14 @@ namespace Jarvis.JsonObjectService.Core.Storage
         /// Object is marked as deleted
         /// </summary>
         public Boolean Deleted { get; set; }
+
+        public OperationType OpType { get; set; }
     }
 
+    public enum OperationType
+    {
+        Put,
+        Delete
+    }
 
 }
