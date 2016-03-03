@@ -22,44 +22,57 @@ namespace Jarvis.JsonStore.Host.Support
 
         internal bool Start()
         {
-            _configuration = new LocalJsonObjectServiceConfiguration();
-            _container = new WindsorContainer();
-            _container.Register(Component.For<JsonObjectServiceConfiguration>().Instance(_configuration));
-
-            _container.Kernel.Resolver.AddSubResolver(new CollectionResolver(_container.Kernel, true));
-            _container.Kernel.Resolver.AddSubResolver(new ArrayResolver(_container.Kernel, true));
-
-
-            _container.AddFacility<LoggingFacility>(
-                f => f.LogUsing(new ExtendedLog4netFactory("log4net.config")));
-
-            _container.AddFacility<StartableFacility>();
-            _container.AddFacility<TypedFactoryFacility>();
-
-            ContainerWrapper.Init(_container);
-
-            _logger = _container.Resolve<ILoggerFactory>().Create(GetType());
-
-            var installers = new List<IWindsorInstaller>()
+            try
             {
-                new ApiInstaller(),
-                new DefaultInstaller(_configuration),
-            };
 
-            _container.Install(installers.ToArray());
 
-            var options = new StartOptions();
+                _configuration = new LocalJsonObjectServiceConfiguration();
+                _container = new WindsorContainer();
+                _container.Register(Component.For<JsonObjectServiceConfiguration>().Instance(_configuration));
 
-            _logger.InfoFormat("Binding to @ {0}", "http://+:40000");
-            options.Urls.Add("http://+:40000");
+                _container.Kernel.Resolver.AddSubResolver(new CollectionResolver(_container.Kernel, true));
+                _container.Kernel.Resolver.AddSubResolver(new ArrayResolver(_container.Kernel, true));
 
-            _webApplication = WebApp.Start<WebApplication>(options);
 
-            return true;
+                _container.AddFacility<LoggingFacility>(
+                    f => f.LogUsing(new ExtendedLog4netFactory("log4net.config")));
+                _logger = _container.Resolve<ILoggerFactory>().Create(GetType());
+
+                _container.AddFacility<StartableFacility>();
+                _container.AddFacility<TypedFactoryFacility>();
+
+                ContainerWrapper.Init(_container);
+
+                var installers = new List<IWindsorInstaller>()
+                {
+                    new ApiInstaller(),
+                    new DefaultInstaller(_configuration),
+                };
+
+                _container.Install(installers.ToArray());
+
+                var options = new StartOptions();
+
+                _logger.InfoFormat("Binding to @ {0}", "http://+:40000");
+                options.Urls.Add("http://+:40000");
+
+                _webApplication = WebApp.Start<WebApplication>(options);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                if (_logger != null)
+                {
+                    _logger.Error("Error during bootstrap: " + ex.Message, ex);
+                }
+                throw;
+            }
         }
 
         internal bool Stop()
         {
+            _container.Dispose();
             return true;
         }
     }

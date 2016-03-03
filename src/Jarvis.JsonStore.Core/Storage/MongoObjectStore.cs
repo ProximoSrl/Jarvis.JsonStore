@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
+using Castle.Core.Logging;
 using Jarvis.JsonStore.Core.Support;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -11,6 +12,9 @@ namespace Jarvis.JsonStore.Core.Storage
     public class MongoObjectStore : IObjectStore
     {
         IMongoDatabase _database;
+
+        public ILogger Logger { get; set; }
+
         private class ConnectionInfo
         {
             public IMongoCollection<StoredObject> Collection { get; set; }
@@ -69,11 +73,14 @@ namespace Jarvis.JsonStore.Core.Storage
             var collectionInfo = GetCollectionForType(type);
             var obj = await GetById(type, id);
             var hash = HashUtils.GetHashOfSerializedJson(jsonObject);
+            var version = 1;
             if (obj != null)
             {
                 //check hash
                 if (obj.Hash == hash)
                     return null;
+
+                version = obj.Version + 1;
             }
 
             StoredObject so = new StoredObject()
@@ -83,6 +90,7 @@ namespace Jarvis.JsonStore.Core.Storage
                 JsonPayload = jsonObject,
                 TimeStamp = DateTime.UtcNow,
                 Hash = hash,
+                Version = version,
                 OpType = OperationType.Put
             };
             collectionInfo.Collection.InsertOne(so);

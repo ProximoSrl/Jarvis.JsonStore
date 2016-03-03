@@ -150,7 +150,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Controllers\JsonObjectController.cs" />
+    <Compile Include="Controllers\JsonStoreController.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Support\ApiInstaller.cs" />
@@ -164,12 +164,19 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="log4net.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="app\index.html" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Jarvis.JsonStore.Client\Jarvis.JsonStore.Client.csproj">
+      <Project>{4f4cd23c-c2a1-46fe-8a0f-20f95d6cc69b}</Project>
+      <Name>Jarvis.JsonStore.Client</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Jarvis.JsonStore.Core\Jarvis.JsonStore.Core.csproj">
       <Project>{25ab612c-cdb0-4446-96c5-a650dda95eed}</Project>
       <Name>Jarvis.JsonObjectService.Core</Name>

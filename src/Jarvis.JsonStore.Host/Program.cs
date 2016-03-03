@@ -100,7 +100,7 @@ namespace Jarvis.JsonStore.Host
             if (!Environment.UserInteractive)
                 return;
             Console.Title = "JARVIS :: Json Object Service";
-            Console.BackgroundColor = ConsoleColor.DarkRed;
+            Console.BackgroundColor = ConsoleColor.DarkCyan;
             Console.Clear();
         }
 

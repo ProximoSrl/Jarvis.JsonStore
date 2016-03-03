@@ -3,15 +3,17 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
+using Castle.Core.Logging;
 using Jarvis.JsonStore.Core.Storage;
 
 namespace Jarvis.JsonStore.Host.Controllers
 {
-    public class JsonObjectController : ApiController
+    public class JsonStoreController : ApiController
     {
         private IObjectStore _store;
+        public ILogger Logger { get; set; }
 
-        public JsonObjectController(
+        public JsonStoreController(
             IObjectStore store)
         {
             _store = store;
@@ -31,7 +33,7 @@ namespace Jarvis.JsonStore.Host.Controllers
 
             return Request.CreateResponse(
                 HttpStatusCode.OK,
-                result
+                result.ToClientStoredJsonObject()
             );
         }
 
@@ -44,7 +46,7 @@ namespace Jarvis.JsonStore.Host.Controllers
 
             return Request.CreateResponse(
                 HttpStatusCode.OK,
-                stored
+                stored.ToClientStoredJsonObject()
             );
         }
 

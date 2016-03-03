@@ -1,4 +1,5 @@
 ﻿using System;
+using Jarvis.JsonStore.Client.Model;
 using ApplicationId = Jarvis.JsonStore.Core.Model.ApplicationId;
 
 namespace Jarvis.JsonStore.Core.Storage
@@ -8,6 +9,8 @@ namespace Jarvis.JsonStore.Core.Storage
         public Int64 Id { get; set; }
 
         public ApplicationId ApplicationId { get; set; }
+
+        public Int32 Version { get; set; }
 
         public String Hash { get; set; }
 
@@ -21,6 +24,17 @@ namespace Jarvis.JsonStore.Core.Storage
         public Boolean Deleted { get; set; }
 
         public OperationType OpType { get; set; }
+
+        public StoredJsonObject ToClientStoredJsonObject()
+        {
+            return new StoredJsonObject()
+            {
+                Hash = Hash,
+                JsonPayload = JsonPayload,
+                ApplicationId = ApplicationId,
+                Version = Version,
+            };
+        }
     }
 
     public enum OperationType
