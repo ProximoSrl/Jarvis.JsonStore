@@ -49,10 +49,17 @@ namespace Jarvis.JsonStore.Host.Controllers
             var payload = await Request.Content.ReadAsStringAsync();
             var stored = await _store.Store(type, id, payload);
 
+            if (stored != null)
+            {
+                return Request.CreateResponse(
+                   HttpStatusCode.OK,
+                   stored.ToClientStoredJsonObject()
+                );
+            }
             return Request.CreateResponse(
-                HttpStatusCode.OK,
-                stored.ToClientStoredJsonObject()
-            );
+                   HttpStatusCode.OK,
+                   (String) null
+                );
         }
 
         [HttpPost]

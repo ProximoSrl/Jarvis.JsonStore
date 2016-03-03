@@ -75,6 +75,17 @@ namespace Jarvis.JsonStore.Tests.Core.Storage
         }
 
         [Test]
+        public async void verify_type_is_case_insensitive()
+        {
+            String jsonObject = "{}";
+            var saved1 = await sut.Store("test", "1", jsonObject);
+            var saved2 = await sut.Store("TeSt", "2", jsonObject);
+            var coll = db.GetCollection<StoredObject>(_eventsCollectionName);
+            var allObj = coll.Find(new BsonDocument()).ToList();
+            Assert.That(allObj.Count, Is.EqualTo(2));
+        }
+
+        [Test]
         public async void verify_save_maintain_history()
         {
             String jsonObject = @"{ ""prop"" : ""test""}";

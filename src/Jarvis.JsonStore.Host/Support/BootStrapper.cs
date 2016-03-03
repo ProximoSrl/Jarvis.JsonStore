@@ -14,20 +14,27 @@ using Jarvis.ConfigurationService.Client;
 
 namespace Jarvis.JsonStore.Host.Support
 {
-    class BootStrapper
+    public class BootStrapper
     {
         IWindsorContainer _container;
         ILogger _logger;
         private IDisposable _webApplication;
         JsonObjectServiceConfiguration _configuration;
 
-        internal bool Start()
+        public BootStrapper(JsonObjectServiceConfiguration configuration = null)
+        {
+            _configuration = configuration;
+        }
+        public bool Start()
         {
             try
             {
-                BootstrapConfigurationServiceClient();
+                if (_configuration == null)
+                {
+                    BootstrapConfigurationServiceClient();
+                    _configuration = new StandardJsonObjectServiceConfiguration();
+                }
 
-                _configuration = new StandardJsonObjectServiceConfiguration();
                 _container = new WindsorContainer();
                 _container.Register(Component.For<JsonObjectServiceConfiguration>().Instance(_configuration));
 
@@ -71,7 +78,7 @@ namespace Jarvis.JsonStore.Host.Support
             }
         }
 
-        internal bool Stop()
+        public bool Stop()
         {
             _container.Dispose();
             return true;

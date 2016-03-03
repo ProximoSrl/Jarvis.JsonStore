@@ -7,6 +7,7 @@ using Castle.Core.Logging;
 using Jarvis.JsonStore.Core.Support;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using Jarvis.JsonStore.Core.Model;
 
 namespace Jarvis.JsonStore.Core.Storage
 {
@@ -31,7 +32,7 @@ namespace Jarvis.JsonStore.Core.Storage
         private ConcurrentDictionary<String, ConnectionInfo>
             collections = new ConcurrentDictionary<string, ConnectionInfo>();
 
-        private ConnectionInfo GetCollectionForType(String type)
+        private ConnectionInfo GetCollectionForType(TypeId type)
         {
             if (!collections.ContainsKey(type))
             {
@@ -59,7 +60,7 @@ namespace Jarvis.JsonStore.Core.Storage
             _database = database;
         }
 
-        public async Task<StoredObject> GetById(String type, String id)
+        public async Task<StoredObject> GetById(TypeId type, String id)
         {
             var collectionInfo = GetCollectionForType(type);
             var obj = await collectionInfo.Collection
@@ -69,7 +70,7 @@ namespace Jarvis.JsonStore.Core.Storage
             return obj;
         }
 
-        public async Task<StoredObject> Store(String type, String id, String jsonObject)
+        public async Task<StoredObject> Store(TypeId type, String id, String jsonObject)
         {
             var collectionInfo = GetCollectionForType(type);
             var obj = await GetById(type, id);
@@ -98,7 +99,7 @@ namespace Jarvis.JsonStore.Core.Storage
             return so;
         }
 
-        public async Task<StoredObject> DeleteById(String type, String id)
+        public async Task<StoredObject> DeleteById(TypeId type, String id)
         {
             var collectionInfo = GetCollectionForType(type);
             var obj = await GetById(type, id);
