@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using System.Globalization;
 
-namespace Jarvis.JsonStore.Client.Model
+namespace Jarvis.JsonStore.Core.Model
 {
     [Serializable]
     public abstract class ClientAbstractStringValue : IEquatable<ClientAbstractStringValue>
@@ -59,6 +59,11 @@ namespace Jarvis.JsonStore.Client.Model
             return id.Value;
         }
 
+        public String AsString 
+        {
+            get { return Value; }
+        }
+
         protected ClientAbstractStringValue(string value)
         {
             Value = value;
@@ -73,6 +78,7 @@ namespace Jarvis.JsonStore.Client.Model
         {
             return _value;
         }
+
     }
 
     [Serializable]

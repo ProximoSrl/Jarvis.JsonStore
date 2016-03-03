@@ -68,7 +68,7 @@ namespace Jarvis.JsonStore.Core.Projections
                             if (@event.OpType == OperationType.Put)
                             {
                                 BsonDocument doc = BsonDocument.Parse(@event.JsonPayload);
-                                doc["_id"] = @event.ApplicationId;
+                                doc["_id"] = @event.ApplicationId.AsString;
                                 collection.Value.Projection.ReplaceOneAsync(
                                      Builders<BsonDocument>.Filter.Eq("_id", @event.ApplicationId),
                                      doc,

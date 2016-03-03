@@ -1,4 +1,5 @@
 ﻿using System;
+using ApplicationId = Jarvis.JsonStore.Core.Model.ApplicationId;
 
 namespace Jarvis.JsonStore.Core.Storage
 {
@@ -6,7 +7,7 @@ namespace Jarvis.JsonStore.Core.Storage
     {
         public Int64 Id { get; set; }
 
-        public String ApplicationId { get; set; }
+        public ApplicationId ApplicationId { get; set; }
 
         public String Hash { get; set; }
 

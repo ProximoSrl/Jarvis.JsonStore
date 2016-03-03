@@ -15,6 +15,7 @@ namespace Jarvis.JsonStore.Tests.Core.Storage
         IMongoDatabase db;
         MongoClient client;
         MongoUrl conn;
+        private string _eventsCollectionName = "events.test";
 
         [TestFixtureSetUp]
         public void TestFixtureSetUp()
@@ -79,7 +80,7 @@ namespace Jarvis.JsonStore.Tests.Core.Storage
             String jsonObject = @"{ ""prop"" : ""test""}";
             var saved1 = await sut.Store("test", "1", "{}");
             var saved2 = await sut.Store("test", "1", jsonObject);
-            var coll = db.GetCollection<StoredObject>("test");
+            var coll = db.GetCollection<StoredObject>(_eventsCollectionName);
             var allObj = coll.Find(new BsonDocument()).ToList();
             Assert.That(allObj.Count, Is.EqualTo(2));
         }
@@ -91,7 +92,7 @@ namespace Jarvis.JsonStore.Tests.Core.Storage
             var saved1 = await sut.Store("test", "1", jsonObject);
             var saved2 = await sut.Store("test", "1", jsonObject);
             Assert.That(saved2, Is.Null);
-            var coll = db.GetCollection<StoredObject>("test");
+            var coll = db.GetCollection<StoredObject>(_eventsCollectionName);
             var allObj = coll.Find(new BsonDocument()).ToList();
             Assert.That(allObj.Count, Is.EqualTo(1));
             Assert.That(allObj.Single().Id, Is.EqualTo(1L));
@@ -105,7 +106,7 @@ namespace Jarvis.JsonStore.Tests.Core.Storage
             var saved1 = await sut.Store("test", "1", jsonObject1);
             var saved2 = await sut.Store("test", "1", jsonObject2);
             Assert.That(saved2, Is.Null);
-            var coll = db.GetCollection<StoredObject>("test");
+            var coll = db.GetCollection<StoredObject>(_eventsCollectionName);
             var allObj = coll.Find(new BsonDocument()).ToList();
             Assert.That(allObj.Count, Is.EqualTo(1));
             Assert.That(allObj.Single().Id, Is.EqualTo(1L));
@@ -120,7 +121,7 @@ namespace Jarvis.JsonStore.Tests.Core.Storage
             Assert.That(saved2, Is.Not.Null);
             Assert.That(saved2.Deleted, Is.EqualTo(true));
             Assert.That(saved2.JsonPayload, Is.EqualTo(null));
-            var coll = db.GetCollection<StoredObject>("test");
+            var coll = db.GetCollection<StoredObject>(_eventsCollectionName);
             var allObj = coll.Find(new BsonDocument()).ToList();
             Assert.That(allObj.Count, Is.EqualTo(2));
  

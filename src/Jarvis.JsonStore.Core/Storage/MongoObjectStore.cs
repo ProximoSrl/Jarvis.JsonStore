@@ -58,7 +58,7 @@ namespace Jarvis.JsonStore.Core.Storage
         {
             var collectionInfo = GetCollectionForType(type);
             var obj = await collectionInfo.Collection
-                .Find(Builders<StoredObject>.Filter.Eq(o => o.ApplicationId, id))
+                .Find(Builders<StoredObject>.Filter.Eq("ApplicationId", id))
                 .Sort(Builders<StoredObject>.Sort.Descending(o => o.Id))
                 .FirstOrDefaultAsync();
             return obj;

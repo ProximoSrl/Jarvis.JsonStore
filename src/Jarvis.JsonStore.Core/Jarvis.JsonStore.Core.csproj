@@ -64,6 +64,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Model\AbstractIdDefinitions.cs" />
+    <Compile Include="Model\ApplicationId.cs" />
     <Compile Include="Projections\PayloadProjection.cs" />
     <Compile Include="Projections\PayloadProjectionCheckpoint.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -72,9 +74,16 @@
     <Compile Include="Storage\StoredObject.cs" />
     <Compile Include="Support\HashUtils.cs" />
     <Compile Include="Support\JsonObjectServiceConfiguration.cs" />
+    <Compile Include="Support\StringValueBsonSerialzier.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Jarvis.JsonStore.Client\Jarvis.JsonStore.Client.csproj">
+      <Project>{4f4cd23c-c2a1-46fe-8a0f-20f95d6cc69b}</Project>
+      <Name>Jarvis.JsonStore.Client</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
