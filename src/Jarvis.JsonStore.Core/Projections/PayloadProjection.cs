@@ -5,6 +5,8 @@ using Castle.Core;
 using Jarvis.JsonStore.Core.Storage;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using System.Collections.Concurrent;
+using Jarvis.JsonStore.Core.Support;
 
 namespace Jarvis.JsonStore.Core.Projections
 {
@@ -17,10 +19,11 @@ namespace Jarvis.JsonStore.Core.Projections
         Thread _pollerThread;
         Boolean _stopped = false;
         IMongoCollection<PayloadProjectionCheckpoint> _checkpoints;
-
-        public PayloadProjection(IMongoDatabase database)
+        PayloadProjectionCollectionManager _collectionManager;
+        public PayloadProjection(IMongoDatabase database, PayloadProjectionCollectionManager collectionManager)
         {
             _database = database;
+            _collectionManager = collectionManager;
             _checkpoints = _database.GetCollection<PayloadProjectionCheckpoint>("payload.checkpoints");
         }
 
@@ -54,10 +57,10 @@ namespace Jarvis.JsonStore.Core.Projections
                 while (_stopped == false)
                 {
                     UpdateCollectionCount();
-                    foreach (var collection in _collections)
+                    foreach (var collectionInfo in _collections)
                     {
-                        var checkPoint = GetCheckpoint(collection.Key);
-                        var events = collection.Value.Events
+                        var checkPoint = GetCheckpoint(collectionInfo.Key);
+                        var events = collectionInfo.Value.Events
                              .Find(Builders<StoredObject>.Filter.Gt(o => o.Id, checkPoint))
                              .Sort(Builders<StoredObject>.Sort.Descending(o => o.Id))
                              .Limit(1000)
@@ -65,25 +68,12 @@ namespace Jarvis.JsonStore.Core.Projections
                         Int64 lastCheckpoint = checkPoint;
                         foreach (var @event in events)
                         {
-                            if (@event.OpType == OperationType.Put)
-                            {
-                                BsonDocument doc = BsonDocument.Parse(@event.JsonPayload);
-                                doc["_id"] = @event.ApplicationId.AsString;
-                                collection.Value.Projection.ReplaceOneAsync(
-                                     Builders<BsonDocument>.Filter.Eq("_id", @event.ApplicationId),
-                                     doc,
-                                     new UpdateOptions { IsUpsert = true });
-
-                            }
-                            else if (@event.OpType == OperationType.Put)
-                            {
-                                collection.Value.Projection.DeleteOne(
-                                     Builders<BsonDocument>.Filter.Eq("_id", @event.ApplicationId));
-                            }
+                            var projectionCollection = collectionInfo.Value.Projection;
+                            ProcessEvent(@event, projectionCollection);
                             lastCheckpoint = @event.Id;
                         }
 
-                        SetCheckpoint(collection.Key, lastCheckpoint);
+                        SetCheckpoint(collectionInfo.Key, lastCheckpoint);
 
                     }
                 }
@@ -93,6 +83,27 @@ namespace Jarvis.JsonStore.Core.Projections
                 _isPolling = false;
             }
             Thread.Sleep(2000);
+        }
+
+        private void ProcessEvent(
+            StoredObject @event, 
+            IMongoCollection<BsonDocument> projectionCollection)
+        {
+            if (@event.OpType == OperationType.Put)
+            {
+                BsonDocument doc = @event.ToBsonDocument();
+
+                projectionCollection.ReplaceOne(
+                     Builders<BsonDocument>.Filter.Eq("_id", @event.ApplicationId.AsString),
+                     doc,
+                     new UpdateOptions { IsUpsert = true });
+
+            }
+            else if (@event.OpType == OperationType.Put)
+            {
+                projectionCollection.DeleteOne(
+                     Builders<BsonDocument>.Filter.Eq("_id", @event.ApplicationId.AsString));
+            }
         }
 
         private void SetCheckpoint(string key, long lastCheckpoint)
@@ -134,12 +145,13 @@ namespace Jarvis.JsonStore.Core.Projections
             foreach (var collection in collections)
             {
                 var collName = collection["name"].AsString;
-                if (collName.StartsWith("events."))
+                if (_collectionManager.IsEventCollection(collName))
                 {
+                    var type = _collectionManager.GetTypeNameFromEventCollectionName(collName);
                     if (!_collections.ContainsKey(collName))
                     {
-                        var eventCollection = _database.GetCollection<StoredObject>(collName);
-                        var projectionCollection = _database.GetCollection<BsonDocument>(collName.Substring("events.".Length));
+                        var eventCollection = _collectionManager.GetEventsCollectionFromName(_database, type);
+                        var projectionCollection = _collectionManager.GetProjectionCollectionFromName(_database, type);
                         _collections.Add(collName, new CollectionInfo()
                         {
                             Events = eventCollection,
@@ -155,6 +167,45 @@ namespace Jarvis.JsonStore.Core.Projections
             public IMongoCollection<StoredObject> Events { get; set; }
 
             public IMongoCollection<BsonDocument> Projection { get; set; }
+        }
+    }
+
+    public class PayloadProjectionCollectionManager
+    {
+        private ConcurrentDictionary<String, IMongoCollection<StoredObject>> _eventsCollections =
+            new ConcurrentDictionary<string, IMongoCollection<StoredObject>>();
+
+        private ConcurrentDictionary<String, IMongoCollection<BsonDocument>> _projectionCollections =
+            new ConcurrentDictionary<string, IMongoCollection<BsonDocument>>();
+
+        public Boolean IsEventCollection(String collectionName)
+        {
+            return collectionName.StartsWith("events.");
+        }
+
+        public IMongoCollection<StoredObject> GetEventsCollectionFromName(IMongoDatabase db, String name)
+        {
+            if (!_eventsCollections.ContainsKey(name))
+            {
+                var collection = db.GetCollection<StoredObject>("events." + name);
+                _eventsCollections.AddOrUpdate(name, collection, (k, c) => collection);
+            }
+            return _eventsCollections[name];
+        }
+
+        public IMongoCollection<BsonDocument> GetProjectionCollectionFromName(IMongoDatabase db, String name)
+        {
+            if (!_projectionCollections.ContainsKey(name))
+            {
+                var collection = db.GetCollection<BsonDocument>(name);
+                _projectionCollections.AddOrUpdate(name, collection, (k, c) => collection);
+            }
+            return _projectionCollections[name];
+        }
+
+        internal String GetTypeNameFromEventCollectionName(string collName)
+        {
+            return collName.Substring("events.".Length);
         }
     }
 }

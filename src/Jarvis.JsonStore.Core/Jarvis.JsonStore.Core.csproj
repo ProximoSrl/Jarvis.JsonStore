@@ -66,12 +66,14 @@
   <ItemGroup>
     <Compile Include="Model\AbstractIdDefinitions.cs" />
     <Compile Include="Model\ApplicationId.cs" />
+    <Compile Include="Projections\PayloadFinder.cs" />
     <Compile Include="Projections\PayloadProjection.cs" />
     <Compile Include="Projections\PayloadProjectionCheckpoint.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Storage\IObjectStore.cs" />
     <Compile Include="Storage\MongoObjectStore.cs" />
     <Compile Include="Storage\StoredObject.cs" />
+    <Compile Include="Support\BsonDocumentUtils.cs" />
     <Compile Include="Support\HashUtils.cs" />
     <Compile Include="Support\JsonObjectServiceConfiguration.cs" />
     <Compile Include="Support\StringValueBsonSerialzier.cs" />

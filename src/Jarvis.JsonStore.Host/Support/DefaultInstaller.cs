@@ -30,7 +30,11 @@ namespace Jarvis.JsonStore.Host.Support
                     .Instance(database),
                 Component
                     .For<PayloadProjection>()
-                    .ImplementedBy<PayloadProjection>());
+                    .ImplementedBy<PayloadProjection>(),
+                 Component
+                    .For<PayloadProjectionCollectionManager>()
+                    .ImplementedBy<PayloadProjectionCollectionManager>()
+                );
         }
     }
 }

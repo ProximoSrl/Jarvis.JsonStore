@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Jarvis.JsonStore.Core.Storage
@@ -29,7 +30,6 @@ namespace Jarvis.JsonStore.Core.Storage
         /// <param name="id"></param>
         /// <returns></returns>
         Task<StoredObject> DeleteById(String type, String id);
-
     }
 
 }
