@@ -5,18 +5,23 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using Castle.Core.Logging;
 using Jarvis.JsonStore.Core.Storage;
+using Jarvis.JsonStore.Core.Projections;
 
 namespace Jarvis.JsonStore.Host.Controllers
 {
     public class JsonStoreController : ApiController
     {
         private IObjectStore _store;
+        private IPayloadFinder _finder;
+
         public ILogger Logger { get; set; }
 
         public JsonStoreController(
-            IObjectStore store)
+            IObjectStore store,
+            IPayloadFinder finder)
         {
             _store = store;
+            _finder = finder;
         }
 
         [HttpGet]
@@ -50,5 +55,32 @@ namespace Jarvis.JsonStore.Host.Controllers
             );
         }
 
+        [HttpPost]
+        [Route("api/store/{type}/_search")]
+        public async Task<HttpResponseMessage> Find(
+            String type,
+            Int32 start = 0,
+            Int32 num = 10,
+            String sort = "")
+        {
+            var payload = await Request.Content.ReadAsStringAsync();
+            Boolean sortAscending = true;
+            if (!String.IsNullOrEmpty(sort))
+            {
+                var splitted = sort.Split(' ');
+                sort = splitted[0];
+                if (splitted.Length > 1 && splitted[1].Equals("desc", StringComparison.OrdinalIgnoreCase))
+                {
+                    sortAscending = false;
+                }
+            }
+            var retValue = await _finder.Search(type, payload, sort, sortAscending, start, num);
+
+
+            return Request.CreateResponse(
+                HttpStatusCode.OK,
+                retValue
+            );
+        }
     }
 }

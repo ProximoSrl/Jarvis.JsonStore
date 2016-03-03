@@ -53,6 +53,9 @@ namespace Jarvis.JsonStore.Core.Projections
             int startFrom, 
             int maxRecord)
         {
+            if (String.IsNullOrEmpty(jsonQuery))
+                jsonQuery = "{}";
+
             var query = _collectionManager.GetProjectionCollectionFromName(_db, type)
                  .Find(BsonDocument.Parse(jsonQuery));
             if (!String.IsNullOrEmpty(sortProperty))

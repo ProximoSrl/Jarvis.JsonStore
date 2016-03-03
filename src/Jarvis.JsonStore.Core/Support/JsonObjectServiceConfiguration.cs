@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Jarvis.ConfigurationService.Client;
+using System;
 
 namespace Jarvis.JsonStore.Core.Support
 {
@@ -6,13 +7,16 @@ namespace Jarvis.JsonStore.Core.Support
     {
         public String MongoDbConnection { get; protected set; }
 
+        public String Address { get; set; }
     }
 
-    public class LocalJsonObjectServiceConfiguration : JsonObjectServiceConfiguration
+    public class StandardJsonObjectServiceConfiguration : JsonObjectServiceConfiguration
     {
-        public LocalJsonObjectServiceConfiguration()
+        public StandardJsonObjectServiceConfiguration()
         {
-            MongoDbConnection = "mongodb://localhost:27017/jarvis-jsonStore";
+            Address = ConfigurationServiceClient.Instance.GetSetting("webapp.port", "http://+:40000");
+            
+            MongoDbConnection = ConfigurationServiceClient.Instance.GetSetting("connection-string", "mongodb://localhost:27017/jarvis-jsonStore");
         }
     }
 }

@@ -10,6 +10,7 @@ using Castle.Services.Logging.Log4netIntegration;
 using Castle.Windsor;
 using Jarvis.JsonStore.Core.Support;
 using Microsoft.Owin.Hosting;
+using Jarvis.ConfigurationService.Client;
 
 namespace Jarvis.JsonStore.Host.Support
 {
@@ -18,15 +19,15 @@ namespace Jarvis.JsonStore.Host.Support
         IWindsorContainer _container;
         ILogger _logger;
         private IDisposable _webApplication;
-        LocalJsonObjectServiceConfiguration _configuration;
+        JsonObjectServiceConfiguration _configuration;
 
         internal bool Start()
         {
             try
             {
+                BootstrapConfigurationServiceClient();
 
-
-                _configuration = new LocalJsonObjectServiceConfiguration();
+                _configuration = new StandardJsonObjectServiceConfiguration();
                 _container = new WindsorContainer();
                 _container.Register(Component.For<JsonObjectServiceConfiguration>().Instance(_configuration));
 
@@ -53,8 +54,8 @@ namespace Jarvis.JsonStore.Host.Support
 
                 var options = new StartOptions();
 
-                _logger.InfoFormat("Binding to @ {0}", "http://+:40000");
-                options.Urls.Add("http://+:40000");
+                _logger.InfoFormat("Binding to @ {0}", _configuration.Address);
+                options.Urls.Add(_configuration.Address);
 
                 _webApplication = WebApp.Start<WebApplication>(options);
 
@@ -75,5 +76,45 @@ namespace Jarvis.JsonStore.Host.Support
             _container.Dispose();
             return true;
         }
+
+        private void BootstrapConfigurationServiceClient()
+        {
+            //this is the configuration with the base parameters value.
+            //var defaultParameterFile = new FileInfo("default-parameters.config");
+            //ConfigurationServiceClient.AppDomainInitializer(
+            //    LoggerFunction, 
+            //    "JARVIS_CONFIG_SERVICE",
+            //    defaultParameterFile : defaultParameterFile);
+
+            ConfigurationServiceClient.AppDomainInitializer(
+                LoggerFunction,
+                "JARVIS_CONFIG_SERVICE");
+        }
+
+        private void LoggerFunction(string message, bool isError, Exception exception)
+        {
+            if (Environment.UserInteractive)
+            {
+                if (isError)
+                {
+                    if (exception != null)
+                    {
+                        Console.WriteLine("ERROR: {0}\n{1}", message, exception.Message);
+                    }
+                    else
+                    {
+                        Console.WriteLine("ERROR: {0}", message);
+                    }
+
+                    Console.WriteLine("Press enter to continue");
+                    Console.ReadLine();
+                }
+                else
+                {
+                    Console.WriteLine("INFO : {0}", message);
+                }
+            }
+        }
+
     }
 }

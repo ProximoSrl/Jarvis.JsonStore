@@ -8,13 +8,19 @@ using Microsoft.Owin.FileSystems;
 using Microsoft.Owin.StaticFiles;
 using Owin;
 using Owin.Metrics;
+using Jarvis.JsonStore.Core.Support;
 
 namespace Jarvis.JsonStore.Host.Support
 {
     class WebApplication
     {
+        JsonObjectServiceConfiguration _config;
 
-
+        public WebApplication(JsonObjectServiceConfiguration config)
+        {
+            _config = config;
+        }
+    
         public void Configuration(IAppBuilder application)
         {
             ConfigureApi(application);

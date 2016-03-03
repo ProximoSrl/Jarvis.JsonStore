@@ -57,7 +57,7 @@ namespace Jarvis.JsonStore.Tests.Core.Projection
             String jsonObject1 = @"{ ""prop"" : ""1""}";
             String jsonObject2 = @"{ ""prop"" : ""2""}";
             await objectStore.Store("test", "1", jsonObject1);
-            await objectStore.Store("test", "1", jsonObject2);
+            await objectStore.Store("test", "2", jsonObject2);
 
             ProcessEvents();
           
@@ -67,6 +67,22 @@ namespace Jarvis.JsonStore.Tests.Core.Projection
              Assert.That(result, Has.Count.EqualTo(1));
             Assert.That(result[0].JsonPayload, Is.Not.Null);
 
+        }
+
+        [Test]
+        public async void verify_null_query_()
+        {
+            String jsonObject1 = @"{ ""prop"" : ""1""}";
+            String jsonObject2 = @"{ ""prop"" : ""2""}";
+            await objectStore.Store("test", "1", jsonObject1);
+            await objectStore.Store("test", "2", jsonObject2);
+
+            ProcessEvents();
+
+            var query = @"";
+            var result = await sut.Search("test", query, "", false, 0, 10);
+
+            Assert.That(result, Has.Count.EqualTo(2));
         }
 
         private void ProcessEvents()
