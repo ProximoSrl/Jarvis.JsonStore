@@ -23,9 +23,17 @@ namespace Jarvis.JsonStore.Tests.Core.Projection
         BootStrapper _bootstrapper;
         TestStoreConfiguration _config;
 
+        IMongoDatabase db;
+        MongoClient client;
+        MongoUrl conn;
+
         [TestFixtureSetUp]
         public void TestFixtureSetUp()
         {
+            conn = new MongoUrl(ConfigurationManager.AppSettings["testDatabase"]);
+            client = new MongoClient(conn);
+            db = client.GetDatabase(conn.DatabaseName);
+            client.DropDatabase(conn.DatabaseName);
             _config = new TestStoreConfiguration();
             sut = new JsonStoreClient("localhost", Int32.Parse(ConfigurationManager.AppSettings["testPort"]));
             _bootstrapper = new BootStrapper(_config);
@@ -46,7 +54,42 @@ namespace Jarvis.JsonStore.Tests.Core.Projection
             sut.Put("test-client", "newId", "{}");
         }
 
+        [Test]
+        public void verify_client_search()
+        {
+            const string objectType = "test-client-search";
+            sut.Put(objectType, "1", @"{""name"" : ""Alfred"" }");
+            sut.Put(objectType, "2", @"{""name"" : ""Brandon"" }");
+            var result = sut.Search(objectType, new JsonStore.Client.Model.SearchParameters()
+            {
+                JsonQuery = "{}",
+                NumberOfRecords = 100,
+                Sort = "",
+                Start = 0,
+            });
+            Assert.That(result, Has.Count.EqualTo(2));
+        }
 
-        
+        [Test]
+        public void verify_client_search_typed()
+        {
+            const string objectType = "test-client-search";
+            sut.Put(objectType, "1", @"{""Name"" : ""Alfred"" }");
+            sut.Put(objectType, "2", @"{""Name"" : ""Brandon"" }");
+            var result = sut.Search<TestJson>(objectType, new JsonStore.Client.Model.SearchParameters()
+            {
+                JsonQuery = "{}",
+                NumberOfRecords = 100,
+                Sort = "Name",
+                Start = 0,
+            });
+            Assert.That(result, Has.Count.EqualTo(2));
+            Assert.That(result[0].Payload.Name, Is.EqualTo("Alfred"));
+        }
+
+        private class TestJson
+        {
+            public String Name { get; set; }
+        }
     }
 }
