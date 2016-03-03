@@ -33,7 +33,6 @@ namespace Jarvis.JsonStore.Tests.Core.Projection
             conn = new MongoUrl(ConfigurationManager.AppSettings["testDatabase"]);
             client = new MongoClient(conn);
             db = client.GetDatabase(conn.DatabaseName);
-            client.DropDatabase(conn.DatabaseName);
             _config = new TestStoreConfiguration();
             sut = new JsonStoreClient("localhost", Int32.Parse(ConfigurationManager.AppSettings["testPort"]));
             _bootstrapper = new BootStrapper(_config);
@@ -44,7 +43,7 @@ namespace Jarvis.JsonStore.Tests.Core.Projection
         [SetUp]
         public void SetUp()
         {
-            
+            client.DropDatabase(conn.DatabaseName);
         }
 
 
@@ -67,7 +66,7 @@ namespace Jarvis.JsonStore.Tests.Core.Projection
                 Sort = "",
                 Start = 0,
             });
-            Assert.That(result, Has.Count.EqualTo(2));
+            Assert.That(result.Result, Has.Count.EqualTo(2));
         }
 
         [Test]
@@ -83,8 +82,13 @@ namespace Jarvis.JsonStore.Tests.Core.Projection
                 Sort = "Name",
                 Start = 0,
             });
-            Assert.That(result, Has.Count.EqualTo(2));
-            Assert.That(result[0].Payload.Name, Is.EqualTo("Alfred"));
+            Assert.That(result.Result, Has.Count.EqualTo(2));
+            Assert.That(result.RecordCount, Is.EqualTo(2));
+            foreach (var record in result.Result)
+            {
+                Console.WriteLine(record.Payload.Name);
+            }
+            Assert.That(result.Result[0].Payload.Name, Is.EqualTo("Alfred"));
         }
 
         private class TestJson

@@ -17,5 +17,16 @@ namespace Jarvis.JsonStore.Tests.Core.Support
                 HashUtils.GetHashOfSerializedJson(jsonObject1),
                 HashUtils.GetHashOfSerializedJson(jsonObject2));
         }
+
+        [Test]
+        public void verify_hash_casing_sensitive_properties()
+        {
+            String jsonObject1 = @"{ ""prop1"" : ""test1""}";
+            String jsonObject2 = @"{ ""pRoP1"" : ""test1""}";
+
+            Assert.AreNotEqual(
+                HashUtils.GetHashOfSerializedJson(jsonObject1),
+                HashUtils.GetHashOfSerializedJson(jsonObject2));
+        }
     }
 }

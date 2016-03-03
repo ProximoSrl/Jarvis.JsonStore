@@ -47,4 +47,25 @@ namespace Jarvis.JsonStore.Client.Model
 
 
     }
+
+    public class FindResult
+    {
+        public Int64 RecordCount { get; set; }
+
+        public IList<StoredJsonObject> Result { get; set; }
+
+        internal FindResult<T> ConvertToTyped<T>()
+        {
+            FindResult<T> retValue = new FindResult<T>() { RecordCount = this.RecordCount };
+            retValue.Result = Result.Select(o => new StoredJsonObject<T>(o)).ToList();
+            return retValue;
+        }
+    }
+
+    public class FindResult<T>
+    {
+        public Int64 RecordCount { get; set; }
+
+        public IList<StoredJsonObject<T>> Result { get; set; }
+    }
 }

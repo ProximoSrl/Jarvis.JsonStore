@@ -22,7 +22,7 @@ namespace Jarvis.JsonStore.Core.Projections
         /// <param name="startFrom">Record to start from</param>
         /// <param name="maxRecord">Max number of record to return.</param>
         /// <returns></returns>
-        Task<IList<StoredJsonObject>> Search(
+        Task<FindResult> Search(
             String type, 
             String jsonQuery,
             String sortProperty,
@@ -45,7 +45,7 @@ namespace Jarvis.JsonStore.Core.Projections
             _collectionManager = collectionManager;
         }
 
-        public async Task<IList<StoredJsonObject>> Search(
+        public async Task<FindResult> Search(
             string type,
             string jsonQuery,
             string sortProperty,
@@ -75,7 +75,15 @@ namespace Jarvis.JsonStore.Core.Projections
 
             var result = await query.ToListAsync();
             var parsedResult = result.Select(d => d.ConvertToStoredJsonObject()).ToList();
-            return parsedResult;
+            
+            var count = await query.CountAsync();
+            return new FindResult()
+            {
+                RecordCount = count,
+                Result = parsedResult,
+            };
         }
     }
+
+
 }

@@ -64,8 +64,8 @@ namespace Jarvis.JsonStore.Tests.Core.Projection
             var query = @"{""prop"" : ""2""}";
             var result = await sut.Search("test", query, "", false, 0, 10);
 
-             Assert.That(result, Has.Count.EqualTo(1));
-            Assert.That(result[0].JsonPayload, Is.Not.Null);
+             Assert.That(result.Result, Has.Count.EqualTo(1));
+            Assert.That(result.Result[0].JsonPayload, Is.Not.Null);
 
         }
 
@@ -82,7 +82,7 @@ namespace Jarvis.JsonStore.Tests.Core.Projection
             var query = @"";
             var result = await sut.Search("test", query, "", false, 0, 10);
 
-            Assert.That(result, Has.Count.EqualTo(2));
+            Assert.That(result.Result, Has.Count.EqualTo(2));
         }
 
         private void ProcessEvents()

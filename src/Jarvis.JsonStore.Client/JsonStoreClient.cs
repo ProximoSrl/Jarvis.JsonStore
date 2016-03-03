@@ -115,7 +115,7 @@ namespace Jarvis.JsonStore.Client
             return new StoredJsonObject<T>(result);
         }
 
-        public List<StoredJsonObject> Search(String type, SearchParameters searchParameters)
+        public FindResult Search(String type, SearchParameters searchParameters)
         {
             using (var client = new WebClient())
             {
@@ -123,21 +123,29 @@ namespace Jarvis.JsonStore.Client
                 client.Headers.Add("Content-Type", "application/json");
                 var payload = Encoding.UTF8.GetBytes(searchParameters.JsonQuery);
                 var result = client.UploadData(resourceUri, payload);
-                if (result == null) return new List<StoredJsonObject>();
+                if (result == null)
+                {
+                    return new FindResult()
+                    {
+                        RecordCount = 0,
+                        Result = null,
+                    };
+                }
 
                 var stringResult = Encoding.UTF8.GetString(result);
 
-                return JsonConvert.DeserializeObject<List<StoredJsonObject>>(stringResult);
+                return JsonConvert.DeserializeObject<FindResult>(stringResult);
             }
         }
 
-        public List<StoredJsonObject<T>> Search<T>(String type, SearchParameters searchParameters)
+        public FindResult<T> Search<T>(String type, SearchParameters searchParameters)
         {
             var result = Search(type, searchParameters);
-            return result.Select(o => new StoredJsonObject<T>(o)).ToList();
+
+            return result.ConvertToTyped<T>();
         }
 
-        public async Task<List<StoredJsonObject>> SearchAsync(String type, SearchParameters searchParameters)
+        public async Task<FindResult> SearchAsync(String type, SearchParameters searchParameters)
         {
             using (var client = new WebClient())
             {
@@ -145,18 +153,25 @@ namespace Jarvis.JsonStore.Client
                 client.Headers.Add("Content-Type", "application/json");
                 var payload = Encoding.UTF8.GetBytes(searchParameters.JsonQuery);
                 var result = await client.UploadDataTaskAsync(resourceUri, payload);
-                if (result == null) return new List<StoredJsonObject>();
+                if (result == null)
+                {
+                    return new FindResult()
+                    {
+                        RecordCount = 0,
+                        Result = null,
+                    };
+                }
 
                 var stringResult = Encoding.UTF8.GetString(result);
 
-                return JsonConvert.DeserializeObject<List<StoredJsonObject>>(stringResult);
+                return JsonConvert.DeserializeObject<FindResult>(stringResult);
             }
         }
 
-        public async Task<List<StoredJsonObject<T>>> SearchAsync<T>(String type, SearchParameters searchParameters)
+        public async Task<FindResult<T>> SearchAsync<T>(String type, SearchParameters searchParameters)
         {
             var result = await SearchAsync(type, searchParameters);
-            return result.Select(o => new StoredJsonObject<T>(o)).ToList();
+            return result.ConvertToTyped<T>();
         }
 
     }
