@@ -85,6 +85,24 @@ namespace Jarvis.JsonStore.Tests.Core.Projection
             Assert.That(result.Result, Has.Count.EqualTo(2));
         }
 
+        [Test]
+        public async void verify_pagination()
+        {
+            String jsonObject = @"{ ""prop"" : ""1""}";
+            for (int i = 0; i < 20; i++)
+            {
+                await objectStore.Store("test", i.ToString(), jsonObject);
+            }
+
+            ProcessEvents();
+
+            var query = @"";
+            var result = await sut.Search("test", query, "", false, 0, 10);
+
+            Assert.That(result.Result, Has.Count.EqualTo(10));
+            Assert.That(result.RecordCount, Is.EqualTo(20));
+        }
+
         private void ProcessEvents()
         {
             var coll = db.GetCollection<BsonDocument>(_projectionCollectionName);

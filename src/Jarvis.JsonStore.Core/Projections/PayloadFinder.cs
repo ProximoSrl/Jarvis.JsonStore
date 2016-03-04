@@ -69,14 +69,15 @@ namespace Jarvis.JsonStore.Core.Projections
                     query = query.Sort(Builders<BsonDocument>.Sort.Descending(sortProperty));
                 }
             }
+            var count = await query.CountAsync();
+
             query = query
                 .Skip(startFrom)
                 .Limit(maxRecord);
 
             var result = await query.ToListAsync();
             var parsedResult = result.Select(d => d.ConvertToStoredJsonObject()).ToList();
-            
-            var count = await query.CountAsync();
+
             return new FindResult()
             {
                 RecordCount = count,

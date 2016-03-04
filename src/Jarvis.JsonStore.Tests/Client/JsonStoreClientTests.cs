@@ -13,12 +13,14 @@ using Fasterflect;
 using Jarvis.JsonStore.Client;
 using Jarvis.JsonStore.Host.Support;
 using Jarvis.JsonStore.Tests.Client;
+using System.Threading;
 
 namespace Jarvis.JsonStore.Tests.Core.Projection
 {
     [TestFixture]
     public class JsonStoreClientTests
     {
+
         JsonStoreClient sut;
         BootStrapper _bootstrapper;
         TestStoreConfiguration _config;
@@ -54,11 +56,38 @@ namespace Jarvis.JsonStore.Tests.Core.Projection
         }
 
         [Test]
+        public void Verify_Client_pagination()
+        {
+            string objectType = "test-client-pag";
+            for (int i = 0; i < 100; i++)
+            {
+                sut.Put(objectType, i.ToString(), "{}");
+            }
+
+            //need to wait for the record to be processed.
+            WaitForProcessed(objectType, 100);
+
+            var result = sut.Search(objectType, new JsonStore.Client.Model.SearchParameters()
+            {
+                JsonQuery = "{}",
+                NumberOfRecords = 10,
+                Sort = "",
+                Start = 0,
+            });
+
+
+            Assert.That(result.Result, Has.Count.EqualTo(10));
+            Assert.That(result.RecordCount, Is.EqualTo(100));
+        }
+
+        [Test]
         public void verify_client_search()
         {
             const string objectType = "test-client-search";
             sut.Put(objectType, "1", @"{""name"" : ""Alfred"" }");
             sut.Put(objectType, "2", @"{""name"" : ""Brandon"" }");
+            WaitForProcessed(objectType, 2);
+
             var result = sut.Search(objectType, new JsonStore.Client.Model.SearchParameters()
             {
                 JsonQuery = "{}",
@@ -66,6 +95,7 @@ namespace Jarvis.JsonStore.Tests.Core.Projection
                 Sort = "",
                 Start = 0,
             });
+          
             Assert.That(result.Result, Has.Count.EqualTo(2));
         }
 
@@ -75,6 +105,8 @@ namespace Jarvis.JsonStore.Tests.Core.Projection
             const string objectType = "test-client-search";
             sut.Put(objectType, "1", @"{""Name"" : ""Alfred"" }");
             sut.Put(objectType, "2", @"{""Name"" : ""Brandon"" }");
+            WaitForProcessed(objectType, 2);
+
             var result = sut.Search<TestJson>(objectType, new JsonStore.Client.Model.SearchParameters()
             {
                 JsonQuery = "{}",
@@ -82,6 +114,7 @@ namespace Jarvis.JsonStore.Tests.Core.Projection
                 Sort = "Name",
                 Start = 0,
             });
+
             Assert.That(result.Result, Has.Count.EqualTo(2));
             Assert.That(result.RecordCount, Is.EqualTo(2));
             foreach (var record in result.Result)
@@ -90,6 +123,19 @@ namespace Jarvis.JsonStore.Tests.Core.Projection
             }
             Assert.That(result.Result[0].Payload.Name, Is.EqualTo("Alfred"));
         }
+
+        private void WaitForProcessed(String typeName, int countExpected)
+        {
+            var coll = db.GetCollection<BsonElement>(typeName);
+            Int32 count = 0;
+            while (count++ < 10)
+            {
+                var cound = coll.Count(new BsonDocument());
+                if (cound >= countExpected) return;
+                Thread.Sleep(500);
+            }
+        }
+
 
         private class TestJson
         {
