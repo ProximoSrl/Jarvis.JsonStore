@@ -128,7 +128,7 @@ namespace Jarvis.JsonStore.Tests.Core.Projection
         {
             var coll = db.GetCollection<BsonElement>(typeName);
             Int32 count = 0;
-            while (count++ < 10)
+            while (count++ < 30)
             {
                 var cound = coll.Count(new BsonDocument());
                 if (cound >= countExpected) return;

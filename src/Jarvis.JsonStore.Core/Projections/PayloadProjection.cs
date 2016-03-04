@@ -50,43 +50,33 @@ namespace Jarvis.JsonStore.Core.Projections
 
         public void Process(Object State)
         {
-            if (_isPolling) return; //TODO:Replace with interlocked exchange technique
-            _isPolling = true;
-            try
+            while (_stopped == false)
             {
-                while (_stopped == false)
+                UpdateCollectionCount();
+                foreach (var collectionInfo in _collections)
                 {
-                    UpdateCollectionCount();
-                    foreach (var collectionInfo in _collections)
+                    var checkPoint = GetCheckpoint(collectionInfo.Key);
+                    var events = collectionInfo.Value.Events
+                         .Find(Builders<StoredObject>.Filter.Gt(o => o.Id, checkPoint))
+                         .Sort(Builders<StoredObject>.Sort.Ascending(o => o.Id))
+                         .Limit(10000)
+                         .ToEnumerable();
+                    Int64 lastCheckpoint = checkPoint;
+                    foreach (var @event in events)
                     {
-                        var checkPoint = GetCheckpoint(collectionInfo.Key);
-                        var events = collectionInfo.Value.Events
-                             .Find(Builders<StoredObject>.Filter.Gt(o => o.Id, checkPoint))
-                             .Sort(Builders<StoredObject>.Sort.Descending(o => o.Id))
-                             .Limit(1000)
-                             .ToEnumerable();
-                        Int64 lastCheckpoint = checkPoint;
-                        foreach (var @event in events)
-                        {
-                            var projectionCollection = collectionInfo.Value.Projection;
-                            ProcessEvent(@event, projectionCollection);
-                            lastCheckpoint = @event.Id;
-                        }
-
-                        SetCheckpoint(collectionInfo.Key, lastCheckpoint);
-
+                        var projectionCollection = collectionInfo.Value.Projection;
+                        ProcessEvent(@event, projectionCollection);
+                        lastCheckpoint = @event.Id;
                     }
+
+                    SetCheckpoint(collectionInfo.Key, lastCheckpoint);
                 }
+                Thread.Sleep(1000);
             }
-            finally
-            {
-                _isPolling = false;
-            }
-            Thread.Sleep(2000);
         }
 
         private void ProcessEvent(
-            StoredObject @event, 
+            StoredObject @event,
             IMongoCollection<BsonDocument> projectionCollection)
         {
             if (@event.OpType == OperationType.Put)

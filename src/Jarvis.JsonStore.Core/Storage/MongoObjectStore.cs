@@ -8,6 +8,7 @@ using Jarvis.JsonStore.Core.Support;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using Jarvis.JsonStore.Core.Model;
+using System.Linq;
 
 namespace Jarvis.JsonStore.Core.Storage
 {
@@ -36,23 +37,48 @@ namespace Jarvis.JsonStore.Core.Storage
         {
             if (!collections.ContainsKey(type))
             {
-                var collection = _database.GetCollection<StoredObject>("events." + type);
-                var last = collection
-                    .Find(new BsonDocument())
-                    .Sort(Builders<StoredObject>.Sort.Descending(o => o.Id))
-                    .FirstOrDefault();
-                Int64 currentId = 0;
-                if (last != null)
-                    currentId = last.Id;
-
-                ConnectionInfo info = new ConnectionInfo()
-                {
-                    Collection = collection,
-                    CurrentId = currentId
-                };
+                ConnectionInfo info = CreateConnection(type);
                 collections.AddOrUpdate(type, info, (c1, c2) => info);
             }
             return collections[type];
+        }
+
+        private ConnectionInfo CreateConnection(TypeId type)
+        {
+            var collection = _database.GetCollection<StoredObject>("events." + type);
+            var last = collection
+                .Find(new BsonDocument())
+                .Sort(Builders<StoredObject>.Sort.Descending(o => o.Id))
+                .FirstOrDefault();
+            Int64 currentId = 0;
+            if (last != null)
+                currentId = last.Id;
+
+            var keys = Builders<StoredObject>.IndexKeys
+                .Ascending(o => o.ApplicationId)
+                .Descending(o => o.Id);
+
+            var indexes = collection.Indexes.List()
+                .ToEnumerable()
+                .Select(d => d["name"].AsString)
+                .ToList();
+
+            if (!indexes.Contains("ApplicationId"))
+            {
+                collection.Indexes.CreateOne(
+                    keys,
+                    new CreateIndexOptions()
+                    {
+                        Name = "ApplicationId"
+                    });
+            }
+
+            ConnectionInfo info = new ConnectionInfo()
+            {
+                Collection = collection,
+                CurrentId = currentId
+            };
+            return info;
         }
 
         public MongoObjectStore(IMongoDatabase database)
