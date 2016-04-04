@@ -31,6 +31,14 @@ namespace Jarvis.JsonStore.Core.Storage
         /// <param name="id"></param>
         /// <returns></returns>
         Task<StoredObject> DeleteById(TypeId type, Model.ApplicationId id);
+
+        /// <summary>
+        /// Return all data needed to de-duplicate the object
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        Task<HashedData> GetHashedDataById(TypeId type, Model.ApplicationId id);
     }
 
 }

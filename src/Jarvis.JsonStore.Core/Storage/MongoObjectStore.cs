@@ -96,10 +96,26 @@ namespace Jarvis.JsonStore.Core.Storage
             return obj;
         }
 
+        public async Task<HashedData> GetHashedDataById(TypeId type, Model.ApplicationId id)
+        {
+            var collectionInfo = GetCollectionForType(type);
+            var obj = await collectionInfo.Collection
+                .Find(Builders<StoredObject>.Filter.Eq("ApplicationId", id.AsString))
+                .Project<HashedData>(
+                    Builders<StoredObject>.Projection
+                        .Include(o => o.Hash)
+                        .Include(o => o.ApplicationId)
+                        .Include(o => o.Version)
+                        .Exclude(o => o.Id))
+                .Sort(Builders<StoredObject>.Sort.Descending(o => o.Id))
+                .FirstOrDefaultAsync();
+            return obj;
+        }
+
         public async Task<StoredObject> Store(TypeId type, Model.ApplicationId id, String jsonObject)
         {
             var collectionInfo = GetCollectionForType(type);
-            var obj = await GetById(type, id);
+            var obj = await GetHashedDataById(type, id);
             var hash = HashUtils.GetHashOfSerializedJson(jsonObject);
             var version = 1;
             if (obj != null)

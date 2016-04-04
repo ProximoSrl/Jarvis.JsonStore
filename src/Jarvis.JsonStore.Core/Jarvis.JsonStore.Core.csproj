@@ -74,6 +74,7 @@
   <ItemGroup>
     <Compile Include="Model\AbstractIdDefinitions.cs" />
     <Compile Include="Model\ApplicationId.cs" />
+    <Compile Include="Model\HashedData.cs" />
     <Compile Include="Model\TypeId.cs" />
     <Compile Include="Projections\PayloadFinder.cs" />
     <Compile Include="Projections\PayloadProjection.cs" />
