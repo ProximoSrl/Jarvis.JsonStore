@@ -86,17 +86,17 @@ namespace Jarvis.JsonStore.Core.Storage
             _database = database;
         }
 
-        public async Task<StoredObject> GetById(TypeId type, String id)
+        public async Task<StoredObject> GetById(TypeId type, Model.ApplicationId id)
         {
             var collectionInfo = GetCollectionForType(type);
             var obj = await collectionInfo.Collection
-                .Find(Builders<StoredObject>.Filter.Eq("ApplicationId", id))
+                .Find(Builders<StoredObject>.Filter.Eq("ApplicationId", id.AsString))
                 .Sort(Builders<StoredObject>.Sort.Descending(o => o.Id))
                 .FirstOrDefaultAsync();
             return obj;
         }
 
-        public async Task<StoredObject> Store(TypeId type, String id, String jsonObject)
+        public async Task<StoredObject> Store(TypeId type, Model.ApplicationId id, String jsonObject)
         {
             var collectionInfo = GetCollectionForType(type);
             var obj = await GetById(type, id);
@@ -125,7 +125,7 @@ namespace Jarvis.JsonStore.Core.Storage
             return so;
         }
 
-        public async Task<StoredObject> DeleteById(TypeId type, String id)
+        public async Task<StoredObject> DeleteById(TypeId type, Model.ApplicationId id)
         {
             var collectionInfo = GetCollectionForType(type);
             var obj = await GetById(type, id);

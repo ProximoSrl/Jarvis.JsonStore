@@ -15,14 +15,14 @@ namespace Jarvis.JsonStore.Core.Storage
         /// <param name="id"></param>
         /// <param name="jsonObject"></param>
         /// <returns></returns>
-        Task<StoredObject> Store(TypeId type, String id, String jsonObject);
+        Task<StoredObject> Store(TypeId type, Model.ApplicationId id, String jsonObject);
 
         /// <summary>
-        /// return object stored 
+        /// return object stored using the application id 
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        Task<StoredObject> GetById(TypeId type, String id);
+        Task<StoredObject> GetById(TypeId type, Model.ApplicationId id);
 
         /// <summary>
         /// Mark the object as removed.
@@ -30,7 +30,7 @@ namespace Jarvis.JsonStore.Core.Storage
         /// <param name="type"></param>
         /// <param name="id"></param>
         /// <returns></returns>
-        Task<StoredObject> DeleteById(TypeId type, String id);
+        Task<StoredObject> DeleteById(TypeId type, Model.ApplicationId id);
     }
 
 }
