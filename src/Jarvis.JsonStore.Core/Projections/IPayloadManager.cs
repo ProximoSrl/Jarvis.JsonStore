@@ -57,14 +57,16 @@ namespace Jarvis.JsonStore.Core.Projections
             try
             {
                 await InnerCreateIndex(type, indexName, properties);
+                return true;
             }
             catch (MongoCommandException cmd)
             {
                 _logger.ErrorFormat(cmd, "Error creating index {0} [{1}]", indexName, cmd.Message);
                 var collection = _collectionManager.GetProjectionCollectionFromName(_db, type);
                 collection.Indexes.DropOne(indexName);
-                await InnerCreateIndex(type, indexName, properties);
             }
+
+            await InnerCreateIndex(type, indexName, properties);
             return true;
         }
 

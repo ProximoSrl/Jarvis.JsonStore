@@ -92,6 +92,28 @@ namespace Jarvis.JsonStore.Tests.Core.Projection
 
         }
 
+        [Test]
+        public async void delete_index()
+        {
+            String jsonObject1 = @"{""test"" : ""value1""}";
+            String jsonObject2 = @"{""test"" : ""value2""}";
+            await objectStore.Store("test", "1", jsonObject1);
+            await objectStore.Store("test", "2", jsonObject2);
+
+            ProcessEvents();
+
+            var result = await sut.EnsureIndex("test", "index1", new[] { new IndexPropertyDefinition("test", false) });
+            Assert.That(result);
+
+            result = await sut.DeleteIndex("test", "index1");
+            Assert.That(result);
+
+
+            var indexes = connManager.GetProjectionCollectionFromName(db, "test").Indexes.List().ToList();
+            var indexNames = indexes.Select(d => d["name"].AsString).ToList();
+            Assert.That(indexNames.Contains("index1"), Is.False);
+        }
+
         private void ProcessEvents()
         {
             var coll = db.GetCollection<BsonDocument>(_projectionCollectionName);
