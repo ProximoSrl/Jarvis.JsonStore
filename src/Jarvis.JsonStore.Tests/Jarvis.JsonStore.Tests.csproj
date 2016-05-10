@@ -75,6 +75,7 @@
   <ItemGroup>
     <Compile Include="Client\JsonStoreClientTests.cs" />
     <Compile Include="Client\TestStoreConfiguration.cs" />
+    <Compile Include="Core\Projection\PayloadManagerTests.cs" />
     <Compile Include="Core\Projection\PayloadFinderTests.cs" />
     <Compile Include="Core\Storage\MongoObjectStoreTests.cs" />
     <Compile Include="Core\Support\HashUtilsTests.cs" />

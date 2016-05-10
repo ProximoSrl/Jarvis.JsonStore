@@ -34,6 +34,9 @@ namespace Jarvis.JsonStore.Host.Support
                 Component
                     .For<IPayloadFinder>()
                     .ImplementedBy<MongoPayloadFinder>(),
+                  Component
+                    .For<IPayloadManager>()
+                    .ImplementedBy<MongoPayloadManager>(),
                  Component
                     .For<PayloadProjectionCollectionManager>()
                     .ImplementedBy<PayloadProjectionCollectionManager>()
