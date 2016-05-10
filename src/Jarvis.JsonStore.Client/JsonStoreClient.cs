@@ -199,7 +199,7 @@ namespace Jarvis.JsonStore.Client
                 client.Headers.Add("Content-Type", "application/json");
                 
                 var payload = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(request));
-                var result = client.UploadData(resourceUri, payload);
+                var result = client.UploadData(resourceUri, "PUT", payload);
                
                 var stringResult = Encoding.UTF8.GetString(result);
 
@@ -216,7 +216,7 @@ namespace Jarvis.JsonStore.Client
                 client.Headers.Add("Content-Type", "application/json");
 
                 var payload = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(request));
-                var result = await client.UploadDataTaskAsync(resourceUri, payload);
+                var result = await client.UploadDataTaskAsync(resourceUri, "PUT", payload);
 
                 var stringResult = Encoding.UTF8.GetString(result);
 
