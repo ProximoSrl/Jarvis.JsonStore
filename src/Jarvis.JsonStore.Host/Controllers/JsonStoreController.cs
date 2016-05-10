@@ -6,6 +6,10 @@ using System.Web.Http;
 using Castle.Core.Logging;
 using Jarvis.JsonStore.Core.Storage;
 using Jarvis.JsonStore.Core.Projections;
+using Jarvis.JsonStore.Host.Models;
+using System.Linq;
+using System.Collections.Generic;
+using Jarvis.JsonStore.Core.Model;
 
 namespace Jarvis.JsonStore.Host.Controllers
 {
@@ -13,15 +17,18 @@ namespace Jarvis.JsonStore.Host.Controllers
     {
         private IObjectStore _store;
         private IPayloadFinder _finder;
+        private IPayloadManager _manager;
 
         public ILogger Logger { get; set; }
 
         public JsonStoreController(
             IObjectStore store,
-            IPayloadFinder finder)
+            IPayloadFinder finder,
+            IPayloadManager manager)
         {
             _store = store;
             _finder = finder;
+            _manager = manager;
         }
 
         [HttpGet]
@@ -58,7 +65,7 @@ namespace Jarvis.JsonStore.Host.Controllers
             }
             return Request.CreateResponse(
                    HttpStatusCode.OK,
-                   (String) null
+                   (String)null
                 );
         }
 
@@ -89,5 +96,71 @@ namespace Jarvis.JsonStore.Host.Controllers
                 retValue
             );
         }
+
+        [HttpPut]
+        [Route("api/store/{type}/indexes")]
+        public async Task<HttpResponseMessage> EnsureIndex(
+            String type,
+            CreateIndexModel createIndexModel)
+        {
+            List<String> errors = new List<string>();
+            if (String.IsNullOrEmpty(createIndexModel.IndexName))
+            {
+                errors.Add("Index name should be specified");
+            }
+            if (createIndexModel.Properties == null || createIndexModel.Properties.Count == 0)
+            {
+                errors.Add("You need at least to choose one property");
+            }
+            if (errors.Count > 0)
+                return Request.CreateResponse(
+                   HttpStatusCode.InternalServerError,
+                   new { Errors = String.Join(",", errors), Success = false });
+
+            var result = await _manager.EnsureIndex(
+                type,
+                createIndexModel.IndexName,
+                createIndexModel.Properties.Select(p => new IndexPropertyDefinition(p.PropertyName, p.Descending)));
+
+            if (!result)
+                return Request.CreateResponse(
+                   HttpStatusCode.InternalServerError,
+                   new { Errors = "Generic Error", Success = false });
+
+            return Request.CreateResponse(
+                HttpStatusCode.OK,
+                new { Success = true }
+            );
+        }
+
+        [HttpDelete]
+        [Route("api/store/{type}/indexes/{name}")]
+        public async Task<HttpResponseMessage> DeleteIndex(
+            String type,
+            String name)
+        {
+            List<String> errors = new List<string>();
+            if (String.IsNullOrEmpty(name))
+            {
+                errors.Add("Index name should be specified");
+            }
+
+            if (errors.Count > 0)
+                return Request.CreateResponse(
+                   HttpStatusCode.InternalServerError,
+                   new { Errors = String.Join(",", errors), Success = false });
+
+            var result = await _manager.DeleteIndex(type, name);
+            if (!result)
+                return Request.CreateResponse(
+                   HttpStatusCode.InternalServerError,
+                   new { Errors = "Generic Error", Success = false });
+
+            return Request.CreateResponse(
+                HttpStatusCode.OK,
+                new { Success = true }
+            );
+        }
+
     }
 }

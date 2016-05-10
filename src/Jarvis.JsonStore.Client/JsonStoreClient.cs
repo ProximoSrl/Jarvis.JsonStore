@@ -1,5 +1,6 @@
 ﻿using Jarvis.JsonStore.Client.Model;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,6 +43,21 @@ namespace Jarvis.JsonStore.Client
                 parameters.Start,
                 parameters.NumberOfRecords,
                 parameters.Sort));
+        }
+
+        private Uri GenerateEnsureIndexAddress(String type)
+        {
+            return new Uri(string.Format("{0}/api/store/{1}/indexes",
+                _serviceUri,
+                type));
+        }
+
+        private Uri GenerateDeleteIndexAddress(String type, String name)
+        {
+            return new Uri(string.Format("{0}/api/store/{1}/indexes/{2}",
+                _serviceUri,
+                type,
+                name));
         }
 
         public StoredJsonObject Put(String type, String id, String jsonPayload)
@@ -174,6 +190,78 @@ namespace Jarvis.JsonStore.Client
             return result.ConvertToTyped<T>();
         }
 
+
+        public Boolean EnsureIndex(String type, CreateIndexRequest request)
+        {
+            using (var client = new WebClient())
+            {
+                var resourceUri = GenerateEnsureIndexAddress(type);
+                client.Headers.Add("Content-Type", "application/json");
+                
+                var payload = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(request));
+                var result = client.UploadData(resourceUri, payload);
+               
+                var stringResult = Encoding.UTF8.GetString(result);
+
+                var response = (JObject) JsonConvert.DeserializeObject(stringResult);
+                return response["success"].Value<Boolean>();
+            }
+        }
+
+        public async Task<Boolean> EnsureIndexAsync(String type, CreateIndexRequest request)
+        {
+            using (var client = new WebClient())
+            {
+                var resourceUri = GenerateEnsureIndexAddress(type);
+                client.Headers.Add("Content-Type", "application/json");
+
+                var payload = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(request));
+                var result = await client.UploadDataTaskAsync(resourceUri, payload);
+
+                var stringResult = Encoding.UTF8.GetString(result);
+
+                var response = (JObject)JsonConvert.DeserializeObject(stringResult);
+                return response["success"].Value<Boolean>();
+            }
+        }
+
+        public Boolean DeleteIndex(String type, String indexName)
+        {
+            using (var client = new WebClient())
+            {
+                var resourceUri = GenerateDeleteIndexAddress(type, indexName);
+                client.Headers.Add("Content-Type", "application/json");
+
+                var result = client.UploadData(
+                     resourceUri,
+                     "DELETE",
+                     new byte[0]);
+
+                var stringResult = Encoding.UTF8.GetString(result);
+
+                var response = (JObject)JsonConvert.DeserializeObject(stringResult);
+                return response["success"].Value<Boolean>();
+            }
+        }
+
+        public async Task<Boolean> DeleteIndexAsync(String type, String indexName)
+        {
+            using (var client = new WebClient())
+            {
+                var resourceUri = GenerateDeleteIndexAddress(type, indexName);
+                client.Headers.Add("Content-Type", "application/json");
+
+                var result = await client.UploadDataTaskAsync(
+                     resourceUri,
+                     "DELETE",
+                     new byte[0]);
+
+                var stringResult = Encoding.UTF8.GetString(result);
+
+                var response = (JObject)JsonConvert.DeserializeObject(stringResult);
+                return response["success"].Value<Boolean>();
+            }
+        }
     }
 }
 

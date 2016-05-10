@@ -50,6 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="JsonStoreClient.cs" />
+    <Compile Include="Model\IndexPropertyDefinitionParameter.cs" />
     <Compile Include="Model\SearchParameters.cs" />
     <Compile Include="Model\SearchResult.cs" />
     <Compile Include="Model\StoredJsonObject.cs" />
