@@ -35,6 +35,7 @@ namespace Jarvis.JsonStore.Host.Controllers
         [Route("api/store/{type}/{id}")]
         public async Task<HttpResponseMessage> Get(String type, String id)
         {
+            if (Logger.IsDebugEnabled) Logger.DebugFormat("Get {0} for type {1}", id, type);
             var result = await _store.GetById(type, id);
             if (result == null)
             {
@@ -53,6 +54,7 @@ namespace Jarvis.JsonStore.Host.Controllers
         [Route("api/store/{type}/{id}")]
         public async Task<HttpResponseMessage> Put(String type, String id)
         {
+            if (Logger.IsDebugEnabled) Logger.DebugFormat("PUT {0} for type {1}", id, type);
             var payload = await Request.Content.ReadAsStringAsync();
             var stored = await _store.Store(type, id, payload);
 
@@ -77,7 +79,10 @@ namespace Jarvis.JsonStore.Host.Controllers
             Int32 num = 10,
             String sort = "")
         {
+
             var payload = await Request.Content.ReadAsStringAsync();
+
+            if (Logger.IsDebugEnabled) Logger.DebugFormat("find {0} for type {1}", payload, type);
             Boolean sortAscending = true;
             if (!String.IsNullOrEmpty(sort))
             {
@@ -103,19 +108,34 @@ namespace Jarvis.JsonStore.Host.Controllers
             String type,
             CreateIndexModel createIndexModel)
         {
+           
             List<String> errors = new List<string>();
-            if (String.IsNullOrEmpty(createIndexModel.IndexName))
+            if (createIndexModel == null)
             {
-                errors.Add("Index name should be specified");
+                errors.Add("Parameter wrong!");
             }
-            if (createIndexModel.Properties == null || createIndexModel.Properties.Count == 0)
+            else
             {
-                errors.Add("You need at least to choose one property");
+                if (String.IsNullOrEmpty(createIndexModel.IndexName))
+                {
+                    errors.Add("Index name should be specified");
+                }
+                if (createIndexModel.Properties == null || createIndexModel.Properties.Count == 0)
+                {
+                    errors.Add("You need at least to choose one property");
+                }
             }
             if (errors.Count > 0)
+            {
+                String errorMessage = String.Join(",", errors);
+                Logger.WarnFormat("CreateIndex input parameter error: {0}", errorMessage);
                 return Request.CreateResponse(
-                   HttpStatusCode.InternalServerError,
-                   new { Errors = String.Join(",", errors), Success = false });
+                       HttpStatusCode.InternalServerError,
+                       new { Errors = String.Join(",", errors), Success = false });
+            }
+            
+
+            if (Logger.IsInfoEnabled) Logger.InfoFormat("Creating index {0} for type {1}", createIndexModel.IndexName, type);
 
             var result = await _manager.EnsureIndex(
                 type,
@@ -149,6 +169,8 @@ namespace Jarvis.JsonStore.Host.Controllers
                 return Request.CreateResponse(
                    HttpStatusCode.InternalServerError,
                    new { Errors = String.Join(",", errors), Success = false });
+
+            if (Logger.IsInfoEnabled) Logger.InfoFormat("Removing index {0} for type {1}", name, type);
 
             var result = await _manager.DeleteIndex(type, name);
             if (!result)
