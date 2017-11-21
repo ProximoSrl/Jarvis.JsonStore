@@ -1,10 +1,10 @@
-#Json Store
+# Json Store
 
 A minimal microservice to store json payload, with simple funcionalities such as deduplication.
 
-##API
+## API
 
-###PUT
+### PUT
 
 It uses simple rest APIS, basically you store a json object with a simple PUT call
 
@@ -28,7 +28,7 @@ Type can be whathever string you want, it is used only to partitionate data. No 
 
 It returns a wrapper object with the hash of json payload, **it returns null if the json payload is not changed from the latest version**
 
-###GET
+### GET
 
 You can retrieve last version of the object with this call
 
