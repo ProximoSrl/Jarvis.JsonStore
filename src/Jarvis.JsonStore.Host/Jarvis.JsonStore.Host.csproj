@@ -19,7 +19,7 @@
     <PackageReference Include="Castle.LoggingFacility" Version="3.3.0" />
     <PackageReference Include="Castle.Windsor" Version="3.3.0" />
     <PackageReference Include="DnsClient" Version="1.4.0" />
-    <PackageReference Include="Jarvis.ConfigurationService.Client" Version="1.4.2" />
+    <PackageReference Include="Jarvis.ConfigurationService.Client" Version="1.8.4" />
     <PackageReference Include="log4net" Version="1.2.10" />
     <PackageReference Include="Metrics.NET" Version="0.2.16" />
     <PackageReference Include="Microsoft.AspNet.Cors" Version="5.0.0" />
@@ -39,7 +39,7 @@
     <PackageReference Include="MongoDB.Driver" Version="2.13.2" />
     <PackageReference Include="MongoDB.Driver.Core" Version="2.13.2" />
     <PackageReference Include="MongoDB.Libmongocrypt" Version="1.2.2" />
-    <PackageReference Include="Newtonsoft.Json" Version="8.0.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="Owin" Version="1.0" />
     <PackageReference Include="Owin.Metrics" Version="0.2.16" />
     <PackageReference Include="SharpCompress" Version="0.23.0" />

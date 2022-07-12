@@ -20,7 +20,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Owin.Host.HttpListener" Version="3.0.1" />
     <PackageReference Include="MongoDB.Bson" Version="2.13.2" />
-    <PackageReference Include="Newtonsoft.Json" Version="8.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="5.0.0" />
   </ItemGroup>
   <ItemGroup>
